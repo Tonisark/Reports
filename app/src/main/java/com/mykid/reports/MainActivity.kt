@@ -200,9 +200,9 @@ fun buildReport(
         ← ${lesson.name}
         - **زمان شروع**: ${lesson.start}
         - **زمان پایان**: ${lesson.end}    
-        - **تست‌های صحیح**: ${lesson.correctTests}
-        - **تست‌های نادرست**: ${lesson.failedTests}
-        - **تست‌های حل نشده**: ${lesson.unsolvedTests}
+        - **درست**: ${lesson.correctTests}
+        - **غلط**: ${lesson.failedTests}
+        - **نزده**: ${lesson.unsolvedTests}
         - **کل تست‌ها**: ${lesson.totalTests}
         - **درصد**: ${lesson.percentage}
         """.trimIndent()
@@ -214,7 +214,7 @@ fun buildReport(
     ** 💤 زمان خواب **: $sleepTime
     **  زمان بیداری **: $wakeUpTime
     
-    ← درس‌ها
+    ## درس‌ها
     $lessonDetails
     
     ** ← تعداد کل تست‌ها** : $totalTestsDay
