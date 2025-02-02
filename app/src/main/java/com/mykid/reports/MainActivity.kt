@@ -91,16 +91,17 @@ fun DashboardScreen() {
                 lessonName = ""
                 lessonStart = ""
                 lessonEnd = ""
-                totalTests = ""
                 correctTests = ""
                 failedTests = ""
                 unsolvedTests = ""
+                totalTests = ""
+
             }
         }) { Text("افزودن درس") }
 
-        NumberField(value = totalTestsDay, onValueChange = { totalTestsDay = it }, label = "تعداد کل تست‌های روز")
+        NumberField(value = totalTestsDay, onValueChange = { totalTestsDay = it }, label = "تعداد کل تست‌ها")
         OutlinedTextField(value = studyTime, onValueChange = { studyTime = it }, label = { Text("زمان مطالعه") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = screenOnTime, onValueChange = { screenOnTime = it }, label = { Text("زمان روشن بودن صفحه گوشی") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(value = screenOnTime, onValueChange = { screenOnTime = it }, label = { Text("تایم گوشی") }, modifier = Modifier.fillMaxWidth())
 
         Button(onClick = {
             report = buildReport(sleepTime, wakeUpTime, lessons, studyTime, screenOnTime, totalTestsDay)
@@ -196,29 +197,29 @@ fun buildReport(
 ): String {
     val lessonDetails = lessons.joinToString("\n") { lesson ->
         """
-        ## ${lesson.name}
+        ← ${lesson.name}
         - **زمان شروع**: ${lesson.start}
-        - **زمان پایان**: ${lesson.end}
-        - **کل تست‌ها**: ${lesson.totalTests}
+        - **زمان پایان**: ${lesson.end}    
         - **تست‌های صحیح**: ${lesson.correctTests}
         - **تست‌های نادرست**: ${lesson.failedTests}
         - **تست‌های حل نشده**: ${lesson.unsolvedTests}
+        - **کل تست‌ها**: ${lesson.totalTests}
         - **درصد**: ${lesson.percentage}
         """.trimIndent()
     }
 
     return """
-    # گزارش مطالعه
+    ← گزارش مطالعه
     
-    **زمان خواب**: $sleepTime
-    **زمان بیداری**: $wakeUpTime
+    ** 💤 زمان خواب **: $sleepTime
+    **  زمان بیداری **: $wakeUpTime
     
-    ## درس‌ها
+    ← درس‌ها
     $lessonDetails
     
-    **تعداد کل تست‌های روز**: $totalTestsDay
-    **زمان مطالعه**: $studyTime
-    **زمان روشن بودن صفحه گوشی**: $screenOnTime
+    ** ← تعداد کل تست‌ها** : $totalTestsDay
+    ** ← تایم مطالعه** : $studyTime
+    ** ← تایم گوشی** : $screenOnTime
     """.trimIndent()
 }
 
@@ -226,5 +227,7 @@ fun buildReport(
 @Composable
 fun PreviewDashboardScreen() {
     ReportsTheme {
+        DashboardScreen()
+
     }
 }
