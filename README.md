@@ -36,7 +36,7 @@ Here are some exciting features im planning to add in future updates:
 - [ ] Cloud Sync
 
 
-## 💡 Contributing
+## 💡 Contributing - Ideas
 
 1. Fork the repository.
 2. Create a new branch for your feature or bugfix:
