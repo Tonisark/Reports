@@ -233,9 +233,7 @@ fun buildReport(
         ← ${lesson.name}
         - **زمان شروع**: ${lesson.start}
         - **زمان پایان**: ${lesson.end}    
-        - **درست**: ${lesson.correctTests}
-        - **غلط**: ${lesson.failedTests}
-        - **نزده**: ${lesson.unsolvedTests}
+        - **درست**: ${lesson.correctTests}  - **غلط**: ${lesson.failedTests}  - **نزده**: ${lesson.unsolvedTests}
         - **کل تست‌ها**: ${lesson.totalTests}
         - **درصد**: ${lesson.percentage}
         """.trimIndent()
