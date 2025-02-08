@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.ui.text.input.KeyboardType
 import com.mykid.reports.ui.theme.ReportsTheme
 import java.util.*
 
@@ -41,7 +43,7 @@ class MainActivity : ComponentActivity() {
 fun DashboardScreen() {
     var sleepTime by remember { mutableStateOf("") }
     var wakeUpTime by remember { mutableStateOf("") }
-    var lessons = remember { mutableStateListOf<Lesson>() }
+    var lessons by remember { mutableStateOf(mutableListOf<Lesson>()) }
     var studyTime by remember { mutableStateOf("") }
     var screenOnTime by remember { mutableStateOf("") }
     var totalTestsDay by remember { mutableStateOf("") }
@@ -54,12 +56,12 @@ fun DashboardScreen() {
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(text = "داشبورد پیگیری مطالعه", style = MaterialTheme.typography.headlineMedium)
+        Text(text = "Study Tracking Dashboard", style = MaterialTheme.typography.headlineMedium)
 
-        TimePickerField(label = "زمان خواب", time = sleepTime) { sleepTime = it }
-        TimePickerField(label = "زمان بیداری", time = wakeUpTime) { wakeUpTime = it }
+        TimePickerField(label = "Sleep Time", time = sleepTime) { sleepTime = it }
+        TimePickerField(label = "Wake Up Time", time = wakeUpTime) { wakeUpTime = it }
 
-        Text(text = "درس‌ها")
+        Text(text = "Lessons")
         lessons.forEach { lesson ->
             LessonRow(lesson = lesson, onRemove = { lessons.remove(lesson) })
         }
@@ -70,34 +72,62 @@ fun DashboardScreen() {
         var totalTests by remember { mutableStateOf("") }
         var correctTests by remember { mutableStateOf("") }
         var failedTests by remember { mutableStateOf("") }
-        var unsolvedTests by remember { mutableStateOf("") }
+        var unsolvedTests by remember { mutableStateOf("")}
 
-        OutlinedTextField(value = lessonName, onValueChange = { lessonName = it }, label = { Text("نام درس") }, modifier = Modifier.fillMaxWidth())
-        TimePickerField(label = "زمان شروع درس", time = lessonStart) { lessonStart = it }
-        TimePickerField(label = "زمان پایان درس", time = lessonEnd) { lessonEnd = it }
-        NumberField(value = totalTests, onValueChange = { totalTests = it }, label = "تعداد کل تست‌ها")
-        NumberField(value = correctTests, onValueChange = { correctTests = it }, label = "تعداد تست‌های صحیح")
-        NumberField(value = failedTests, onValueChange = { failedTests = it }, label = "تعداد تست‌های نادرست")
-        NumberField(value = unsolvedTests, onValueChange = { unsolvedTests = it }, label = "تعداد تست‌های حل نشده")
+        OutlinedTextField(value = lessonName, onValueChange = { lessonName = it }, label = { Text("Lesson Name") }, modifier = Modifier.fillMaxWidth())
+        TimePickerField(label = "Lesson Start Time", time = lessonStart) { lessonStart = it }
+        TimePickerField(label = "Lesson End Time", time = lessonEnd) { lessonEnd = it }
+        NumberField(value = correctTests, onValueChange = { correctTests = it }, label = "Correct Tests")
+        NumberField(value = failedTests, onValueChange = { failedTests = it }, label = "Wrong Tests")
+        NumberField(value = unsolvedTests, onValueChange = { unsolvedTests = it }, label = "Unsolved Tests")
+
+        //Remove Total Test Field From UI
+      //  NumberField(value = totalTests, onValueChange = { totalTests = it }, label = "Total Tests")
 
         Button(onClick = {
             if (lessonName.isNotEmpty() && lessonStart.isNotEmpty() && lessonEnd.isNotEmpty() &&
-                totalTests.isNotEmpty() && correctTests.isNotEmpty() && failedTests.isNotEmpty() && unsolvedTests.isNotEmpty()) {
-                val total = totalTests.toIntOrNull() ?: 0
+                correctTests.isNotEmpty() && failedTests.isNotEmpty()
+            ) {
+                val unsolved = unsolvedTests.toIntOrNull() ?: 0
                 val correct = correctTests.toIntOrNull() ?: 0
-                val percentage = if (total > 0) (correct * 100 / total).toString() + "%" else "N/A"
+                val failed = failedTests.toIntOrNull() ?: 0
 
-                lessons.add(Lesson(lessonName, lessonStart, lessonEnd, totalTests, correctTests, failedTests, unsolvedTests, percentage))
+                // Automatically calculate the total tests
+                val total = correct + failed + unsolved
+
+                // Adjust correct tests: remove 1 correct for every 3 wrong answers
+                val adjustedCorrect = correct - (failed / 3)
+                val finalCorrect = if (adjustedCorrect < 0) 0 else adjustedCorrect
+
+                // Calculate percentage
+                val percentage = if (total > 0) (finalCorrect * 100 / total).toString() + "%" else "N/A"
+
+                // Create a new Lesson instance
+                lessons.add(
+                    Lesson(
+                        name = lessonName,
+                        start = lessonStart,
+                        end = lessonEnd,
+                        totalTests = total.toString(), // Set the calculated total
+                        correctTests = finalCorrect.toString(),
+                        failedTests = failedTests,
+                        unsolvedTests = unsolved.toString(),
+                        percentage = percentage
+                    )
+                )
+
+                // Clear input fields
                 lessonName = ""
                 lessonStart = ""
                 lessonEnd = ""
                 correctTests = ""
                 failedTests = ""
                 unsolvedTests = ""
-                totalTests = ""
-
             }
-        }) { Text("افزودن درس") }
+        }) {
+            Text("Add Lesson")
+        }
+
 
         NumberField(value = totalTestsDay, onValueChange = { totalTestsDay = it }, label = "تعداد کل تست‌ها")
         OutlinedTextField(value = studyTime, onValueChange = { studyTime = it }, label = { Text("زمان مطالعه") }, modifier = Modifier.fillMaxWidth())
@@ -105,14 +135,12 @@ fun DashboardScreen() {
 
         Button(onClick = {
             report = buildReport(sleepTime, wakeUpTime, lessons, studyTime, screenOnTime, totalTestsDay)
-
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-            val clip = android.content.ClipData.newPlainText("گزارش مطالعه", report)
+            val clip = android.content.ClipData.newPlainText("Study Report", report)
             clipboard.setPrimaryClip(clip)
-
-            Toast.makeText(context, "گزارش در کلیپ بورد کپی شد", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Report copied to clipboard", Toast.LENGTH_SHORT).show()
         }) {
-            Text("تولید گزارش")
+            Text("Generate Report")
         }
 
         if (report.isNotEmpty()) {
@@ -127,7 +155,10 @@ fun LessonRow(lesson: Lesson, onRemove: () -> Unit) {
         Column(modifier = Modifier.weight(1f)) {
             Text(text = lesson.name, style = MaterialTheme.typography.bodyLarge)
             Text(text = "شروع: ${lesson.start}, پایان: ${lesson.end}", style = MaterialTheme.typography.bodyMedium)
-            Text(text = "کل تست‌ها: ${lesson.totalTests}, صحیح: ${lesson.correctTests}, نادرست: ${lesson.failedTests}, حل نشده: ${lesson.unsolvedTests}, درصد: ${lesson.percentage}", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = "کل تست‌ها: ${lesson.totalTests}, صحیح: ${lesson.correctTests}, نادرست: ${lesson.failedTests}, نزده: ${lesson.unsolvedTests}, درصد: ${lesson.percentage}",
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
         Button(onClick = onRemove) { Text("حذف") }
     }
@@ -167,14 +198,16 @@ fun NumberField(value: String, onValueChange: (String) -> Unit, label: String) {
     OutlinedTextField(
         value = value,
         onValueChange = { newValue ->
-            if (newValue.all { it.isDigit() }) {
+            if (newValue.all { it.isDefined() }) {
                 onValueChange(newValue)
             }
         },
         label = { Text(label) },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number) // Show number pad
     )
 }
+
 
 data class Lesson(
     val name: String,
@@ -183,8 +216,8 @@ data class Lesson(
     val totalTests: String,
     val correctTests: String,
     val failedTests: String,
-    val unsolvedTests: String,
-    val percentage: String
+    val unsolvedTests: String, // Add this parameter
+    val percentage: String // Add this parameter
 )
 
 fun buildReport(
