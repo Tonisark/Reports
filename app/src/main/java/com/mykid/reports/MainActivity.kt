@@ -91,16 +91,19 @@ fun DashboardScreen() {
                 val unsolved = unsolvedTests.toIntOrNull() ?: 0
                 val correct = correctTests.toIntOrNull() ?: 0
                 val failed = failedTests.toIntOrNull() ?: 0
-
                 // Automatically calculate the total tests
                 val total = correct + failed + unsolved
 
-                // Adjust correct tests: remove 1 correct for every 3 wrong answers
-                val adjustedCorrect = correct - (failed / 3)
-                val finalCorrect = if (adjustedCorrect < 0) 0 else adjustedCorrect
+                // Apply the new percentage formula
+                val totalPercent = if (total > 0) {
+                    ((((correct * 3) - failed).toFloat() / (total * 3)) * 100).coerceIn(0f, 100f)
+                } else {
+                    0f
+                }
 
-                // Calculate percentage
-                val percentage = if (total > 0) (finalCorrect * 100 / total).toString() + "%" else "N/A"
+                // Format percentage values to one decimal place
+                var formattedTotalPercent = "%.1f".format(totalPercent) + "%"
+
 
                 // Create a new Lesson instance
                 lessons.add(
@@ -109,10 +112,10 @@ fun DashboardScreen() {
                         start = lessonStart,
                         end = lessonEnd,
                         totalTests = total.toString(), // Set the calculated total
-                        correctTests = finalCorrect.toString(),
+                        correctTests = correctTests,
                         failedTests = failedTests,
                         unsolvedTests = unsolved.toString(),
-                        percentage = percentage
+                        percentage = formattedTotalPercent
                     )
                 )
 
@@ -123,6 +126,7 @@ fun DashboardScreen() {
                 correctTests = ""
                 failedTests = ""
                 unsolvedTests = ""
+                formattedTotalPercent = ""
             }
         }) {
             Text("Add Lesson")
@@ -230,6 +234,7 @@ fun buildReport(
 ): String {
     val lessonDetails = lessons.joinToString("\n") { lesson ->
         """
+            
         ← ${lesson.name}
         - **زمان شروع**: ${lesson.start}
         - **زمان پایان**: ${lesson.end}    
