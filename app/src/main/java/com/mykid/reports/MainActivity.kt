@@ -69,7 +69,6 @@ fun DashboardScreen() {
         var lessonName by remember { mutableStateOf("") }
         var lessonStart by remember { mutableStateOf("") }
         var lessonEnd by remember { mutableStateOf("") }
-        var totalTests by remember { mutableStateOf("") }
         var correctTests by remember { mutableStateOf("") }
         var failedTests by remember { mutableStateOf("") }
         var unsolvedTests by remember { mutableStateOf("")}
