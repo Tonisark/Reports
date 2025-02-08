@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
 fun DashboardScreen() {
     var sleepTime by remember { mutableStateOf("") }
     var wakeUpTime by remember { mutableStateOf("") }
-    var lessons by remember { mutableStateOf(mutableListOf<Lesson>()) }
+    var lessons = remember { mutableStateListOf<Lesson>() }
     var studyTime by remember { mutableStateOf("") }
     var screenOnTime by remember { mutableStateOf("") }
     var totalTestsDay by remember { mutableStateOf("") }
