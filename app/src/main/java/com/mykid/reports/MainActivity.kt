@@ -110,7 +110,7 @@ fun DashboardScreen() {
                         name = lessonName,
                         start = lessonStart,
                         end = lessonEnd,
-                        totalTests = total.toString(), // Set the calculated total
+                        totalTests = total.toString(),
                         correctTests = correctTests,
                         failedTests = failedTests,
                         unsolvedTests = unsolved.toString(),
@@ -219,8 +219,8 @@ data class Lesson(
     val totalTests: String,
     val correctTests: String,
     val failedTests: String,
-    val unsolvedTests: String, // Add this parameter
-    val percentage: String // Add this parameter
+    val unsolvedTests: String,
+    val percentage: String
 )
 
 fun buildReport(
