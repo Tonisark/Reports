@@ -69,6 +69,7 @@ fun DashboardScreen() {
         var lessonName by remember { mutableStateOf("") }
         var lessonStart by remember { mutableStateOf("") }
         var lessonEnd by remember { mutableStateOf("") }
+        var totalTests by remember { mutableStateOf("") }
         var correctTests by remember { mutableStateOf("") }
         var failedTests by remember { mutableStateOf("") }
         var unsolvedTests by remember { mutableStateOf("")}
@@ -110,7 +111,7 @@ fun DashboardScreen() {
                         name = lessonName,
                         start = lessonStart,
                         end = lessonEnd,
-                        totalTests = total.toString(),
+                        totalTests = total.toString(), // Set the calculated total
                         correctTests = correctTests,
                         failedTests = failedTests,
                         unsolvedTests = unsolved.toString(),
@@ -219,8 +220,8 @@ data class Lesson(
     val totalTests: String,
     val correctTests: String,
     val failedTests: String,
-    val unsolvedTests: String,
-    val percentage: String
+    val unsolvedTests: String, // Add this parameter
+    val percentage: String // Add this parameter
 )
 
 fun buildReport(
