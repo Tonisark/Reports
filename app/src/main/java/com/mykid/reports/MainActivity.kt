@@ -15,45 +15,141 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.mykid.reports.ui.theme.ReportsTheme
 import kotlinx.coroutines.launch
 import java.util.*
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.DropdownMenu
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            var isDarkTheme by remember { mutableStateOf(false) }
-            ReportsTheme(darkTheme = isDarkTheme) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                MainScreen()
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainScreen() {
+    val context = LocalContext.current
+    var books by remember {
+        mutableStateOf(BookStorage.loadBooks(context))
+    }
+
+    // Update storage whenever books change
+    LaunchedEffect(books) {
+        BookStorage.saveBooks(context, books)
+    }
+
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    var selectedSection by remember { mutableStateOf("Dashboard") }
+    var isDarkTheme by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Column(
+                    modifier = Modifier.fillMaxHeight(),
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        ThemeToggleButton(isDarkTheme = isDarkTheme, onToggle = { isDarkTheme = !isDarkTheme })
-                        Spacer(modifier = Modifier.height(16.dp))
-                        DashboardScreen()
+                    Column {
+                        Spacer(Modifier.height(12.dp))
+                        NavigationDrawerItem(
+                            icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
+                            label = { Text("Dashboard") },
+                            selected = selectedSection == "Dashboard",
+                            onClick = {
+                                selectedSection = "Dashboard"
+                                scope.launch { drawerState.close() }
+                            }
+                        )
+                        NavigationDrawerItem(
+                            icon = { Icon(Icons.Default.Book, contentDescription = null) },
+                            label = { Text("Lessons") },
+                            selected = selectedSection == "Lessons",
+                            onClick = {
+                                selectedSection = "Lessons"
+                                scope.launch { drawerState.close() }
+                            }
+                        )
+                        NavigationDrawerItem(
+                            icon = { Icon(Icons.Default.Analytics, contentDescription = null) },
+                            label = { Text("Analysis") },
+                            selected = selectedSection == "Analysis",
+                            onClick = {
+                                selectedSection = "Analysis"
+                                scope.launch { drawerState.close() }
+                            }
+                        )
                     }
+
+                    ThemeToggleButton(
+                        isDarkTheme = isDarkTheme,
+                        onToggle = { isDarkTheme = !isDarkTheme },
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+        }
+    ) {
+        ReportsTheme(darkTheme = isDarkTheme) {
+            Scaffold(
+                snackbarHost = { SnackbarHost(snackbarHostState) },
+                topBar = {
+                    TopAppBar(
+                        title = { Text(selectedSection) },
+                        navigationIcon = {
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(Icons.Default.Menu, contentDescription = "Menu")
+                            }
+                        }
+                    )
+                }
+            ) { padding ->
+                when (selectedSection) {
+                    "Dashboard" -> DashboardScreen(
+                        modifier = Modifier.padding(padding),
+                        availableBooks = books
+                    )
+                    "Lessons" -> LessonsScreen(
+                        modifier = Modifier.padding(padding),
+                        books = books,
+                        onBooksChange = { books = it }
+                    )
+                    "Analysis" -> Text("Analysis Screen", modifier = Modifier.padding(padding))
                 }
             }
         }
     }
 }
 
-
 @Composable
-fun DashboardScreen() {
+fun DashboardScreen(
+    modifier: Modifier,
+    availableBooks: List<String>
+) {
     var sleepTime by remember { mutableStateOf("") }
     var wakeUpTime by remember { mutableStateOf("") }
-    var lessons by remember { mutableStateOf(mutableListOf<Lesson>()) }
+    var lessons by remember { mutableStateOf(listOf<Lesson>()) }
     var studyTime by remember { mutableStateOf("") }
     var screenOnTime by remember { mutableStateOf("") }
     var totalTestsDay by remember { mutableStateOf("") }
@@ -61,6 +157,16 @@ fun DashboardScreen() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    var lessonName by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+
+    // Update total tests calculation
+    LaunchedEffect(lessons) {
+        val total = lessons.sumOf { lesson ->
+            lesson.totalTests.toIntOrNull() ?: 0
+        }
+        totalTestsDay = total.toString()
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -98,17 +204,51 @@ fun DashboardScreen() {
 
             Text(text = "Lessons")
             lessons.forEach { lesson ->
-                LessonRow(lesson = lesson, onRemove = { lessons.remove(lesson) })
+                LessonRow(lesson = lesson, onRemove = { lessons = lessons.filter { it != lesson } })
             }
 
-            var lessonName by remember { mutableStateOf("") }
             var lessonStart by remember { mutableStateOf("") }
             var lessonEnd by remember { mutableStateOf("") }
             var correctTests by remember { mutableStateOf("") }
             var failedTests by remember { mutableStateOf("") }
             var unsolvedTests by remember { mutableStateOf("") }
 
-            OutlinedTextField(value = lessonName, onValueChange = { lessonName = it }, label = { Text("Lesson Name") }, modifier = Modifier.fillMaxWidth())
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = lessonName,
+                    onValueChange = { lessonName = it },
+                    label = { Text("Lesson Name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    trailingIcon = {
+                        IconButton(onClick = { expanded = !expanded }) {
+                            Icon(
+                                if (expanded) Icons.Default.KeyboardArrowUp
+                                else Icons.Default.KeyboardArrowDown,
+                                "Select book"
+                            )
+                        }
+                    }
+                )
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    availableBooks.forEach { book ->
+                        DropdownMenuItem(
+                            text = { Text(book) },
+                            onClick = {
+                                lessonName = book
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
             TimePickerField(label = "Lesson Start Time", time = lessonStart) { lessonStart = it }
             TimePickerField(label = "Lesson End Time", time = lessonEnd) { lessonEnd = it }
             NumberField(value = correctTests, onValueChange = { correctTests = it }, label = "Correct Tests")
@@ -130,17 +270,15 @@ fun DashboardScreen() {
                     }
                     val formattedTotalPercent = "%.1f".format(totalPercent) + "%"
 
-                    lessons.add(
-                        Lesson(
-                            name = lessonName,
-                            start = lessonStart,
-                            end = lessonEnd,
-                            totalTests = total.toString(),
-                            correctTests = correctTests,
-                            failedTests = failedTests,
-                            unsolvedTests = unsolved.toString(),
-                            percentage = formattedTotalPercent
-                        )
+                    lessons = lessons + Lesson(
+                        name = lessonName,
+                        start = lessonStart,
+                        end = lessonEnd,
+                        totalTests = total.toString(),
+                        correctTests = correctTests,
+                        failedTests = failedTests,
+                        unsolvedTests = unsolved.toString(),
+                        percentage = formattedTotalPercent
                     )
 
                     lessonName = ""
@@ -154,9 +292,105 @@ fun DashboardScreen() {
                 Text("Add Lesson")
             }
 
-            NumberField(value = totalTestsDay, onValueChange = { totalTestsDay = it }, label = "Total Tests")
+            OutlinedTextField(
+                value = totalTestsDay,
+                onValueChange = { /* Read only */ },
+                label = { Text("Total Tests (Auto-calculated)") },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                enabled = false
+            )
             OutlinedTextField(value = studyTime, onValueChange = { studyTime = it }, label = { Text("Study Time") }, modifier = Modifier.fillMaxWidth())
             OutlinedTextField(value = screenOnTime, onValueChange = { screenOnTime = it }, label = { Text("Screen Time") }, modifier = Modifier.fillMaxWidth())
+        }
+    }
+}
+
+@Composable
+fun LessonsScreen(
+    modifier: Modifier,
+    books: List<String>,
+    onBooksChange: (List<String>) -> Unit
+) {
+    var newBookName by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    if (newBookName.isNotEmpty()) {
+                        onBooksChange(books + newBookName)
+                        newBookName = ""
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Book added to list")
+                        }
+                    }
+                }
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Book")
+            }
+        }
+    ) { padding ->
+        Column(
+            modifier = modifier
+                .padding(padding)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Text(
+                text = "Book List",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            OutlinedTextField(
+                value = newBookName,
+                onValueChange = { newBookName = it },
+                label = { Text("Book Name") },
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    if (newBookName.isNotEmpty()) {
+                        IconButton(onClick = { newBookName = "" }) {
+                            Icon(Icons.Default.Clear, "Clear")
+                        }
+                    }
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            books.forEach { book ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = book,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        IconButton(
+                            onClick = {
+                                onBooksChange(books.filter { it != book })
+                            }
+                        ) {
+                            Icon(Icons.Default.Delete, contentDescription = "Remove Book")
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -224,7 +458,6 @@ fun TimePickerField(label: String, time: String, onTimeChange: (String) -> Unit)
     )
 }
 
-
 @Composable
 fun NumberField(value: String, onValueChange: (String) -> Unit, label: String) {
     OutlinedTextField(
@@ -241,7 +474,7 @@ fun NumberField(value: String, onValueChange: (String) -> Unit, label: String) {
 }
 
 @Composable
-fun ThemeToggleButton(isDarkTheme: Boolean, onToggle: () -> Unit) {
+fun ThemeToggleButton(isDarkTheme: Boolean, onToggle: () -> Unit, modifier: Modifier = Modifier) {
     val icon = if (isDarkTheme) Icons.Default.FavoriteBorder else Icons.Default.Favorite
     val iconColor = if (isDarkTheme) Color(0xFF03DAC5) else Color(0xFF6200EA)
 
@@ -251,7 +484,7 @@ fun ThemeToggleButton(isDarkTheme: Boolean, onToggle: () -> Unit) {
             containerColor = iconColor,
             contentColor = Color.White
         ),
-        modifier = Modifier.fillMaxWidth().height(60.dp)
+        modifier = modifier.fillMaxWidth()
     ) {
         AnimatedVisibility(visible = isDarkTheme) {
             Icon(
@@ -264,8 +497,6 @@ fun ThemeToggleButton(isDarkTheme: Boolean, onToggle: () -> Unit) {
     }
 }
 
-
-
 data class Lesson(
     val name: String,
     val start: String,
@@ -273,8 +504,8 @@ data class Lesson(
     val totalTests: String,
     val correctTests: String,
     val failedTests: String,
-    val unsolvedTests: String, // Add this parameter
-    val percentage: String // Add this parameter
+    val unsolvedTests: String,
+    val percentage: String
 )
 
 fun buildReport(
@@ -316,7 +547,6 @@ fun buildReport(
 @Composable
 fun PreviewDashboardScreen() {
     ReportsTheme {
-        DashboardScreen()
-
+        DashboardScreen(Modifier, listOf("Book 1", "Book 2"))
     }
 }
