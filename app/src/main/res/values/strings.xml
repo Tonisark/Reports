@@ -1,7 +1,9 @@
 <resources>
-    <string name="app_name">Reports</string>
-
-
-
-    <!-- Translate -->
+    <string name="app_name">MyKid Reports</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="lessons">Lessons</string>
+    <string name="analysis">Analysis</string>
+    <string name="sleep_time">Sleep Time</string>
+    <string name="wake_up_time">Wake Up Time</string>
+    <string name="study_tracking_dashboard">Study Tracking Dashboard</string>
 </resources>
