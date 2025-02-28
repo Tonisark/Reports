@@ -1,9 +1,12 @@
 <resources>
     <string name="app_name">MyKid Reports</string>
-    <string name="dashboard">Dashboard</string>
-    <string name="lessons">Lessons</string>
-    <string name="analysis">Analysis</string>
+    <string name="study_report">Study Report</string>
     <string name="sleep_time">Sleep Time</string>
     <string name="wake_up_time">Wake Up Time</string>
-    <string name="study_tracking_dashboard">Study Tracking Dashboard</string>
+    <string name="lessons">Lessons</string>
+    <string name="total_tests">Total Tests</string>
+    <string name="total_percentage">Total Percentage</string>
+    <string name="study_time">Study Time</string>
+    <string name="screen_time">Screen Time</string>
+    <string name="settings">Settings</string>
 </resources>

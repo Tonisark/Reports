@@ -2,11 +2,14 @@ package com.mykid.reports.ui.screens.settings
 
 import android.app.Application
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.mykid.reports.data.repository.SettingsRepository
 import com.mykid.reports.ui.base.BaseViewModel
 import com.mykid.reports.data.localization.LocalizationManager
+import kotlinx.coroutines.launch
+import java.util.Locale
 
 data class SettingsUiState(
     val selectedLanguage: String = "en",
@@ -33,7 +36,7 @@ class SettingsViewModel(application: Application) : BaseViewModel<SettingsState>
     init {
         loadSettings()
         // Initialize with saved language
-        LocalizationManager.setLanguage(repository.getLanguage())
+        LocalizationManager.setLocale(Locale(repository.getLanguage()))
     }
 
     private fun loadSettings() {
@@ -45,10 +48,10 @@ class SettingsViewModel(application: Application) : BaseViewModel<SettingsState>
             )
         }
     }
-    
+
     fun updateLanguage(language: String) {
         repository.saveLanguage(language)
-        LocalizationManager.setLanguage(language)
+        LocalizationManager.setLocale(Locale(language))
         updateState { it.copy(selectedLanguage = language) }
     }
 
@@ -69,4 +72,10 @@ class SettingsViewModel(application: Application) : BaseViewModel<SettingsState>
     fun updateScreenTimeLimit(minutes: Int) {
         updateState { it.copy(screenTimeLimit = minutes) }
     }
-} 
+
+    private fun setLanguage(language: String) {
+        viewModelScope.launch {
+            repository.saveLanguage(language)
+        }
+    }
+}

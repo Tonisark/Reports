@@ -1,25 +1,17 @@
 package com.mykid.reports.ui.screens.dashboard
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.mykid.reports.data.repository.BookRepository
 import com.mykid.reports.data.repository.LessonRepository
 import com.mykid.reports.domain.model.Lesson
 import com.mykid.reports.ui.base.BaseViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.createSavedStateHandle
-import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.mykid.reports.utils.buildReport
-import com.mykid.reports.utils.LocalizationManager
+import com.mykid.reports.data.localization.LocalizationManager
 
 data class DashboardUiState(
     val sleepTime: String = "",
@@ -151,7 +143,7 @@ class DashboardViewModel(
     private fun generateReport() {
         val state = uiState.value
         if (state.lessons.isNotEmpty()) {
-            val currentLocale = LocalizationManager.getCurrentLocale()
+            val currentLocale = LocalizationManager.currentLocale.value
             val isEnglish = currentLocale.language == "en"
             val report = buildReport(state.lessons, isEnglish)
             updateState { it.copy(report = report) }

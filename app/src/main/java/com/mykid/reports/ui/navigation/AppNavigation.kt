@@ -21,7 +21,13 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -39,7 +45,7 @@ import kotlinx.coroutines.launch
 import com.mykid.reports.data.localization.LocalizationManager
 
 sealed class Screen(val route: String, val icon: ImageVector, val labelKey: String) {
-    object Dashboard : Screen("dashboard", Icons.Default.Dashboard, "dashboard")
+    object Dashboard : Screen("dashboard", Icons.Default.Dashboard, "Dash Board")
     object Lessons : Screen("lessons", Icons.Default.Book, "lessons")
     object Analysis : Screen("analysis", Icons.Default.Analytics, "analysis")
     object Settings : Screen("settings", Icons.Default.Settings, "settings")
@@ -70,6 +76,11 @@ fun AppNavigation(
     val scope = rememberCoroutineScope()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
+
+    val locale by LocalizationManager.currentLocale.collectAsState()
+    val screens = remember(locale) {
+        listOf(Screen.Dashboard, Screen.Lessons, Screen.Analysis, Screen.Settings)
+    }
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -80,14 +91,15 @@ fun AppNavigation(
                 ) {
                     Column {
                         Spacer(Modifier.height(12.dp))
-                        listOf(Screen.Dashboard, Screen.Lessons, Screen.Analysis, Screen.Settings).forEach { screen ->
+                        screens.forEach { screen ->
                             NavigationDrawerItem(
                                 icon = { Icon(screen.icon, contentDescription = null) },
-                                label = { Text(screen.getLocalizedLabel()) },
+                                label = { Text(LocalizationManager.getString(screen.labelKey)) },
                                 selected = currentRoute == screen.route,
                                 onClick = {
                                     navController.navigate(screen.route) {
-                                        popUpTo(Screen.Dashboard.route) { inclusive = true }
+                                        popUpTo(Screen.Dashboard.route) { saveState = true }
+                                        launchSingleTop = true
                                     }
                                     scope.launch { drawerState.close() }
                                 }
@@ -95,6 +107,7 @@ fun AppNavigation(
                         }
                     }
 
+                    // 🔹 Theme toggle updates correctly
                     ThemeToggleButton(
                         isDarkTheme = isDarkTheme,
                         onToggle = { onThemeChange(!isDarkTheme) },
@@ -130,4 +143,5 @@ fun AppNavigation(
             }
         }
     }
-} 
+}
+

@@ -23,14 +23,20 @@ import com.mykid.reports.utils.buildReport
 fun DashboardScreen(
     viewModel: DashboardViewModel = viewModel(factory = DashboardViewModel.Factory),
     onNavigateToSettings: () -> Unit
+
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showAddDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val sharedTimes = viewModel.getSharedTimes()
-
+    val locale by LocalizationManager.currentLocale.collectAsState()
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(LocalizationManager.getString("dashboard")) },
+            )
+        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
             Row(
@@ -41,17 +47,17 @@ fun DashboardScreen(
                         if (uiState.lessons.isNotEmpty()) {
                             val report = buildReport(uiState.lessons)
                             copyToClipboard(context, report)
-                            viewModel.showSnackbar("Report copied to clipboard")
+                            viewModel.showSnackbar(LocalizationManager.getString("clipboard_copied"))
                         }
                     }
                 ) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Copy Report")
+                    Icon(Icons.Default.ContentCopy, contentDescription = LocalizationManager.getString("copy_report"))
                 }
                 
                 FloatingActionButton(
                     onClick = { showAddDialog = true }
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Lesson")
+                    Icon(Icons.Default.Add, contentDescription = LocalizationManager.getString("add_lesson"))
                 }
             }
         }
@@ -64,7 +70,7 @@ fun DashboardScreen(
         ) {
             if (uiState.lessons.isEmpty()) {
                 Text(
-                    text = "No lessons added yet",
+                    text = LocalizationManager.getString("no_lessons_yet"),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
@@ -108,4 +114,4 @@ private fun copyToClipboard(context: Context, text: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
     val clip = android.content.ClipData.newPlainText("Study Report", text)
     clipboard.setPrimaryClip(clip)
-} 
+}

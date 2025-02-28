@@ -63,4 +63,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+
+    implementation("com.patrykandpatrick.vico:compose:1.6.5")
+    implementation("com.patrykandpatrick.vico:compose-m3:1.6.5")
 }

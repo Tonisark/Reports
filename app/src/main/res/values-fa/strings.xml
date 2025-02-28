@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">گزارشات مای‌کید</string>
+    <string name="study_report">گزارش مطالعه</string>
+    <string name="sleep_time">زمان خواب</string>
+    <string name="wake_up_time">زمان بیداری</string>
+    <string name="lessons">درس‌ها</string>
+    <string name="total_tests">تعداد کل تست‌ها</string>
+    <string name="total_percentage">درصد کل</string>
+    <string name="study_time">تایم مطالعه</string>
+    <string name="screen_time">تایم گوشی</string>
+    <string name="settings">تنظیمات</string>
+</resources>

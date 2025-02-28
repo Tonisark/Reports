@@ -8,8 +8,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.mykid.reports.ui.screens.settings.components.*
 import com.mykid.reports.data.localization.LocalizationManager
+import com.mykid.reports.ui.screens.settings.components.LanguageSelector
+import com.mykid.reports.ui.screens.settings.components.SettingsSection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -19,6 +20,7 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    val locale by LocalizationManager.currentLocale.collectAsState()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -26,7 +28,7 @@ fun SettingsScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            Icons.Default.ArrowBack, 
+                            Icons.Default.ArrowBack,
                             contentDescription = LocalizationManager.getString("back")
                         )
                     }
@@ -39,6 +41,7 @@ fun SettingsScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
+            // Language Selector
             SettingsSection(title = LocalizationManager.getString("language")) {
                 LanguageSelector(
                     selectedLanguage = uiState.selectedLanguage,
@@ -46,19 +49,13 @@ fun SettingsScreen(
                 )
             }
 
+            // Dark Mode Toggle
             SettingsSection(title = LocalizationManager.getString("theme")) {
                 Switch(
                     checked = uiState.isDarkTheme,
                     onCheckedChange = { viewModel.updateTheme(it) }
                 )
             }
-
-            SettingsSection(title = LocalizationManager.getString("notifications")) {
-                NotificationPreferences(
-                    enabled = uiState.notificationsEnabled,
-                    onEnabledChange = { viewModel.updateNotifications(it) }
-                )
-            }
         }
     }
-} 
+}
