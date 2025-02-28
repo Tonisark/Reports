@@ -1,12 +1,26 @@
 <resources>
-    <string name="app_name">گزارشات مای‌کید</string>
+    <string name="study_analysis">تحلیل مطالعه</string>
+    <string name="back">بازگشت</string>
+    <string name="performance_overview">نمای کلی عملکرد</string>
+    <string name="study_hours">ساعت‌های مطالعه</string>
+    <string name="total_tests">تعداد کل تست‌ها</string>
+    <string name="avg_score">میانگین نمره</string>
+    <string name="progress_chart">نمودار پیشرفت</string>
+    <string name="test_distribution">توزیع تست</string>
+    <string name="study_time_distribution">توزیع زمان مطالعه</string>
     <string name="study_report">گزارش مطالعه</string>
     <string name="sleep_time">زمان خواب</string>
     <string name="wake_up_time">زمان بیداری</string>
     <string name="lessons">درس‌ها</string>
-    <string name="total_tests">تعداد کل تست‌ها</string>
     <string name="total_percentage">درصد کل</string>
-    <string name="study_time">تایم مطالعه</string>
-    <string name="screen_time">تایم گوشی</string>
+    <string name="study_time">زمان مطالعه</string>
+    <string name="screen_time">زمان صفحه نمایش</string>
     <string name="settings">تنظیمات</string>
+
+    <!-- عنوان داشبورد -->
+    <string name="dashboard">داشبورد</string>
+
+    <!-- آیتم‌های منو -->
+    <string name="analysis">تحلیل</string>
+    <string name="dash_board">داشبورد</string>
 </resources>

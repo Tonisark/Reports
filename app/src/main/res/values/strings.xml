@@ -1,12 +1,26 @@
 <resources>
-    <string name="app_name">MyKid Reports</string>
+    <string name="study_analysis">Study Analysis</string>
+    <string name="back">Back</string>
+    <string name="performance_overview">Performance Overview</string>
+    <string name="study_hours">Study Hours</string>
+    <string name="total_tests">Total Tests</string>
+    <string name="avg_score">Avg Score</string>
+    <string name="progress_chart">Progress Chart</string>
+    <string name="test_distribution">Test Distribution</string>
+    <string name="study_time_distribution">Study Time Distribution</string>
     <string name="study_report">Study Report</string>
     <string name="sleep_time">Sleep Time</string>
     <string name="wake_up_time">Wake Up Time</string>
     <string name="lessons">Lessons</string>
-    <string name="total_tests">Total Tests</string>
     <string name="total_percentage">Total Percentage</string>
     <string name="study_time">Study Time</string>
     <string name="screen_time">Screen Time</string>
     <string name="settings">Settings</string>
+
+    <!-- Dashboard Title -->
+    <string name="dashboard">Dash Board</string>
+
+    <!-- Menu Items -->
+    <string name="analysis">Analysis</string>
+    <string name="dash_board">Dash Board</string>
 </resources>
