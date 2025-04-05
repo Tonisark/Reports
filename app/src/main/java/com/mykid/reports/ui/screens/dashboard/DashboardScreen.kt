@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mykid.reports.data.localization.LocalizationManager
+import com.mykid.reports.domain.model.Lesson
 import com.mykid.reports.ui.components.LessonRow
 import com.mykid.reports.ui.components.AddLessonDialog
 import com.mykid.reports.utils.buildReport
@@ -23,7 +24,6 @@ import com.mykid.reports.utils.buildReport
 fun DashboardScreen(
     viewModel: DashboardViewModel = viewModel(factory = DashboardViewModel.Factory),
     onNavigateToSettings: () -> Unit
-
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showAddDialog by remember { mutableStateOf(false) }
@@ -31,6 +31,10 @@ fun DashboardScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val sharedTimes = viewModel.getSharedTimes()
     val locale by LocalizationManager.currentLocale.collectAsState()
+
+    // State for tracking which lesson is being edited
+    var lessonToEdit by remember { mutableStateOf<Lesson?>(null) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -53,7 +57,7 @@ fun DashboardScreen(
                 ) {
                     Icon(Icons.Default.ContentCopy, contentDescription = LocalizationManager.getString("copy_report"))
                 }
-                
+
                 FloatingActionButton(
                     onClick = { showAddDialog = true }
                 ) {
@@ -85,6 +89,14 @@ fun DashboardScreen(
                     items(uiState.lessons) { lesson ->
                         LessonRow(
                             lesson = lesson,
+                            onEdit = {
+                                lessonToEdit = lesson
+                                showAddDialog = true
+                            },
+                            onCopy = {
+                                viewModel.copyLessonToClipboard(context, lesson)
+                                viewModel.showSnackbar(LocalizationManager.getString("lesson_copied"))
+                            },
                             onRemove = { viewModel.removeLesson(lesson) }
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -95,15 +107,24 @@ fun DashboardScreen(
             if (showAddDialog) {
                 AddLessonDialog(
                     showDialog = showAddDialog,
-                    onDismiss = { showAddDialog = false },
-                    onAddLesson = { 
-                        if (uiState.lessons.isEmpty()) {
-                            viewModel.setSharedTimes(it.sleepTime, it.wakeUpTime)
+                    onDismiss = {
+                        showAddDialog = false
+                        lessonToEdit = null
+                    },
+                    onAddLesson = { newLesson ->
+                        lessonToEdit?.let { oldLesson ->
+                            viewModel.updateLesson(oldLesson, newLesson)
+                        } ?: run {
+                            if (uiState.lessons.isEmpty()) {
+                                viewModel.setSharedTimes(newLesson.sleepTime, newLesson.wakeUpTime)
+                            }
+                            viewModel.addLesson(newLesson)
                         }
-                        viewModel.addLesson(it)
+                        lessonToEdit = null
                     },
                     sharedTimes = sharedTimes,
-                    isFirstLesson = uiState.lessons.isEmpty()
+                    isFirstLesson = uiState.lessons.isEmpty(),
+                    lessonToEdit = lessonToEdit
                 )
             }
         }

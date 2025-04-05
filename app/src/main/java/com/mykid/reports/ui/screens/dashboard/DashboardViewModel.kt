@@ -1,6 +1,9 @@
 package com.mykid.reports.ui.screens.dashboard
 
 import android.app.Application
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.mykid.reports.data.repository.BookRepository
 import com.mykid.reports.data.repository.LessonRepository
@@ -153,4 +156,44 @@ class DashboardViewModel(
     fun clearReport() {
         updateState { DashboardState() }
     }
-} 
+
+    // Fix the updateLesson method
+    fun updateLesson(oldLesson: Lesson, newLesson: Lesson) {
+        viewModelScope.launch {
+            try {
+                val updatedLesson = newLesson.copy(id = oldLesson.id) // Preserve original ID
+                val currentLessons = uiState.value.lessons.map {
+                    if (it.id == oldLesson.id) updatedLesson else it
+                }
+                lessonRepository.saveLessons(currentLessons)
+                updateState { it.copy(lessons = currentLessons) }
+                showSnackbar("Lesson updated successfully")
+            } catch (e: Exception) {
+                setError("Failed to update lesson: ${e.message}")
+            }
+        }
+    }
+
+    fun copyLessonToClipboard(context: Context, lesson: Lesson) {
+        try {
+            val lessonText = buildString {
+                appendLine("Lesson: ${lesson.name}")
+                appendLine("Start: ${lesson.start}")
+                appendLine("End: ${lesson.end}")
+                appendLine("Total Tests: ${lesson.totalTests}")
+                appendLine("Correct: ${lesson.correctTests}")
+                appendLine("Wrong: ${lesson.failedTests}")
+                appendLine("Unsolved: ${lesson.unsolvedTests}")
+                appendLine("Percentage: ${String.format("%.1f", lesson.percentage)}%")
+            }
+
+            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Lesson Data", lessonText)
+            clipboard.setPrimaryClip(clip)
+
+            showSnackbar("Lesson copied to clipboard")
+        } catch (e: Exception) {
+            setError("Failed to copy lesson: ${e.message}")
+        }
+    }
+}

@@ -19,7 +19,7 @@ abstract class BaseViewModel<T : UiState>(initialState: T) : ViewModel() {
         }
     }
 
-    protected fun setError(error: String?) {
+    open fun setError(error: String?) {
         updateState { currentState ->
             currentState.updateError(error) as T
         }

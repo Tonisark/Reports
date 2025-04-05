@@ -10,11 +10,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mykid.reports.ui.components.AddLessonDialog
 import com.mykid.reports.ui.components.LessonRow
 import com.mykid.reports.data.localization.LocalizationManager
+import com.mykid.reports.domain.model.Lesson
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,8 +24,10 @@ fun LessonsScreen(
     viewModel: LessonsViewModel = viewModel(factory = LessonsViewModel.Factory),
     onNavigateBack: () -> Unit
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     var showAddDialog by remember { mutableStateOf(false) }
+    var lessonToEdit by remember { mutableStateOf<Lesson?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.loadLessons()
@@ -68,9 +72,16 @@ fun LessonsScreen(
                         .padding(16.dp)
                 ) {
                     items(uiState.lessons) { lesson ->
-                        key(lesson.name + lesson.start) {
+                        key(lesson.id) {
                             LessonRow(
                                 lesson = lesson,
+                                onEdit = {
+                                    lessonToEdit = lesson
+                                    showAddDialog = true
+                                },
+                                onCopy = {
+                                    viewModel.copyLessonToClipboard(lesson)
+                                },
                                 onRemove = { viewModel.removeLesson(lesson) }
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -82,26 +93,40 @@ fun LessonsScreen(
             if (showAddDialog) {
                 AddLessonDialog(
                     showDialog = showAddDialog,
-                    onDismiss = { showAddDialog = false },
-                    onAddLesson = { 
-                        viewModel.addLesson(it)
+                    onDismiss = {
                         showAddDialog = false
+                        lessonToEdit = null
+                    },
+                    onAddLesson = { newLesson ->
+                        lessonToEdit?.let { oldLesson ->
+                            viewModel.updateLesson(oldLesson, newLesson)
+                        } ?: run {
+                            viewModel.addLesson(newLesson)
+                        }
+                        showAddDialog = false
+                        lessonToEdit = null
                     },
                     sharedTimes = Pair("", ""),
-                    isFirstLesson = uiState.lessons.isEmpty()
+                    isFirstLesson = uiState.lessons.isEmpty(),
+                    lessonToEdit = lessonToEdit
                 )
+            }
+
+            // Show success message if any
+            uiState.successMessage?.let { message ->
+                LaunchedEffect(message) {
+                    SnackbarHostState().showSnackbar(message)
+                    viewModel.clearMessage()
+                }
             }
 
             // Show error if any
             uiState.error?.let { error ->
-                Snackbar(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .align(Alignment.BottomCenter)
-                ) {
-                    Text(error)
+                LaunchedEffect(error) {
+                    SnackbarHostState().showSnackbar(error)
+                    viewModel.clearMessage()
                 }
             }
         }
     }
-} 
+}

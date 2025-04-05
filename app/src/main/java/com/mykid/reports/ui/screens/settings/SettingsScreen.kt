@@ -48,7 +48,7 @@ fun SettingsScreen(
                     onLanguageSelected = { viewModel.updateLanguage(it) }
                 )
             }
-
+            /*TODO -> Add Function for the Theme Button  */
             // Dark Mode Toggle
             SettingsSection(title = LocalizationManager.getString("theme")) {
                 Switch(

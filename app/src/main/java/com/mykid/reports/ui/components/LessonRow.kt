@@ -2,18 +2,31 @@ package com.mykid.reports.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import com.mykid.reports.domain.model.Lesson
 
 @Composable
-fun LessonRow(lesson: Lesson, onRemove: () -> Unit) {
+fun LessonRow(
+    lesson: Lesson,
+    onRemove: () -> Unit,
+    onEdit: () -> Unit,
+    onCopy: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -37,13 +50,65 @@ fun LessonRow(lesson: Lesson, onRemove: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Total: ${lesson.totalTests} | ✅ Correct: ${lesson.correctTests} | ❌ Wrong: ${lesson.failedTests} | ⏳ Unsolved: ${lesson.unsolvedTests} | 📊 ${String.format("%.1f", lesson.percentage)}%",
+                    text = buildAnnotatedString {
+                        append("Total: ${lesson.totalTests} | ")
+                        withStyle(style = SpanStyle(color = Color.Green)) {
+                            append("✅ Correct: ${lesson.correctTests} | ")
+                        }
+                        withStyle(style = SpanStyle(color = Color.Red)) {
+                            append("❌ Wrong: ${lesson.failedTests} | ")
+                        }
+                        append("⏳ Unsolved: ${lesson.unsolvedTests} | ")
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("📊 ${String.format("%.1f", lesson.percentage)}%")
+                        }
+                    },
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-            IconButton(onClick = onRemove) {
-                Icon(Icons.Default.Delete, contentDescription = "Remove")
+
+            // Action buttons row
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.width(IntrinsicSize.Min)
+            ) {
+                // Edit Button
+                IconButton(
+                    onClick = onEdit,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                // Copy Button
+                IconButton(
+                    onClick = onCopy,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ContentCopy,
+                        contentDescription = "Copy",
+                        tint = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+
+                // Delete Button
+                IconButton(
+                    onClick = onRemove,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
-} 
+}

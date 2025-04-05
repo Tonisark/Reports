@@ -1,4 +1,5 @@
 <resources>
+    <string name="app_name">Reports</string>
     <string name="study_analysis">Study Analysis</string>
     <string name="back">Back</string>
     <string name="performance_overview">Performance Overview</string>

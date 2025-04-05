@@ -1,5 +1,7 @@
 # 📌 Study Report App
+
 # 🚂 "This project will receive continuous updates.
+
 The **Study Report App** is a simple yet powerful tool designed to help students and professionals track their study sessions with timestamps and stylish reporting features. Whether you're preparing for exams, managing your learning schedule, or analyzing your study habits, this app has you covered.
 
 ---
@@ -27,7 +29,8 @@ Here are some exciting features im planning to add in future updates:
 - ⏳ **Study & Screen Time Tracking** – Monitor effective study hours and device usage.
 
 ## 🎯 Roadmap
-- [ ] Multi-Language Support
+
+- [✔] Multi-Language Support
 - [ ] Reminders and Notifications
 - [ ] Advanced Analytics
 - [ ] Dashboard Overview
@@ -35,25 +38,31 @@ Here are some exciting features im planning to add in future updates:
 - [ ] Collaborative Study
 - [ ] Cloud Sync
 
-
 ## 💡 Contributing - Ideas
 
 1. Fork the repository.
 2. Create a new branch for your feature or bugfix:
-```bash 
+
+```bash
 git checkout -b feature/your-feature-name
 ```
+
 3. Commit your changes:
+
 ```bash
 git commit -m "Add your commit message here"
 ```
+
 4. Push to the branch:
+
 ```bash
 git push origin feature/your-feature-name
 ```
+
 5. Open a pull request and describe your changes.
 
 ## Contact
+
 For questions, feedback, or collaboration opportunities, feel free to reach out:
 
 📧 Email : shakingsh23ark@gmail.com

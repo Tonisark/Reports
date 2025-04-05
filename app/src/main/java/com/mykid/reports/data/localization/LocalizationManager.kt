@@ -30,6 +30,7 @@ object LocalizationManager {
             "study_time" to "Study Time",
             "screen_time" to "Screen Time",
             "settings" to "Settings",
+            "no_lessons_yet" to "No lessons yet",
             //DashBoard Title
             "dashboard" to "Dash Board",
 
@@ -58,6 +59,9 @@ object LocalizationManager {
             "study_time" to "تایم مطالعه",
             "screen_time" to "تایم گوشی",
             "settings" to "تنظیمات",
+
+            "no_lessons_yet" to "درسی نیست",
+
             //DashBoard Title
             "dashboard" to "داشبورد",
             //MenuItem

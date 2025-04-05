@@ -9,29 +9,36 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mykid.reports.data.localization.LocalizationManager
 import com.mykid.reports.domain.model.Lesson
+import java.util.UUID
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun AddLessonDialog(
     showDialog: Boolean,
     onDismiss: () -> Unit,
     onAddLesson: (Lesson) -> Unit,
     sharedTimes: Pair<String, String>,
-    isFirstLesson: Boolean
+    isFirstLesson: Boolean,
+    lessonToEdit: Lesson? = null
 ) {
     if (showDialog) {
-        var name by remember { mutableStateOf("") }
-        var startTime by remember { mutableStateOf("") }
-        var endTime by remember { mutableStateOf("") }
-        var correctTests by remember { mutableStateOf("") }
-        var failedTests by remember { mutableStateOf("") }
-        var unsolvedTests by remember { mutableStateOf("") }
-        var sleepTime by remember { mutableStateOf(sharedTimes.first) }
-        var wakeUpTime by remember { mutableStateOf(sharedTimes.second) }
+        var name by remember { mutableStateOf(lessonToEdit?.name ?: "") }
+        var startTime by remember { mutableStateOf(lessonToEdit?.start ?: "") }
+        var endTime by remember { mutableStateOf(lessonToEdit?.end ?: "") }
+        var correctTests by remember { mutableStateOf(lessonToEdit?.correctTests?.toString() ?: "") }
+        var failedTests by remember { mutableStateOf(lessonToEdit?.failedTests?.toString() ?: "") }
+        var unsolvedTests by remember { mutableStateOf(lessonToEdit?.unsolvedTests?.toString() ?: "") }
+        var sleepTime by remember { mutableStateOf(lessonToEdit?.sleepTime ?: sharedTimes.first) }
+        var wakeUpTime by remember { mutableStateOf(lessonToEdit?.wakeUpTime ?: sharedTimes.second) }
 
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text(LocalizationManager.getString("add_lesson")) },
+            title = {
+                Text(
+                    if (lessonToEdit != null) LocalizationManager.getString("edit_lesson")
+                    else LocalizationManager.getString("add_lesson")
+                )
+            },
             text = {
                 Column(
                     modifier = Modifier
@@ -42,7 +49,8 @@ fun AddLessonDialog(
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text(LocalizationManager.getString("lesson_name")) }
+                        label = { Text(LocalizationManager.getString("lesson_name")) },
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     if (isFirstLesson) {
@@ -78,7 +86,8 @@ fun AddLessonDialog(
                         },
                         label = { Text(LocalizationManager.getString("correct_tests")) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     OutlinedTextField(
@@ -88,7 +97,8 @@ fun AddLessonDialog(
                         },
                         label = { Text(LocalizationManager.getString("failed_tests")) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     OutlinedTextField(
@@ -98,7 +108,8 @@ fun AddLessonDialog(
                         },
                         label = { Text(LocalizationManager.getString("unsolved_tests")) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             },
@@ -110,15 +121,16 @@ fun AddLessonDialog(
                             val failed = failedTests.toIntOrNull() ?: 0
                             val unsolved = unsolvedTests.toIntOrNull() ?: 0
                             val total = correct + failed + unsolved
-                            
+
                             val percentage = if (total > 0) {
                                 ((((correct * 3) - failed).toFloat() / (total * 3)) * 100).coerceIn(0f, 100f)
                             } else {
                                 0f
                             }
-                            
+
                             onAddLesson(
                                 Lesson(
+                                    id = lessonToEdit?.id ?: UUID.randomUUID().toString(), // Fixed: Generate ID if new lesson
                                     name = name,
                                     start = startTime,
                                     end = endTime,
@@ -137,7 +149,8 @@ fun AddLessonDialog(
                         }
                     }
                 ) {
-                    Text(LocalizationManager.getString("add"))
+                    Text(if (lessonToEdit != null) LocalizationManager.getString("update")
+                    else LocalizationManager.getString("add"))
                 }
             },
             dismissButton = {
@@ -147,4 +160,4 @@ fun AddLessonDialog(
             }
         )
     }
-} 
+}

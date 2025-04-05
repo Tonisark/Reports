@@ -6,7 +6,8 @@ import com.mykid.reports.ui.base.UiState
 data class LessonsState(
     val lessons: List<Lesson> = emptyList(),
     override val isLoading: Boolean = false,
-    override val error: String? = null
+    override val error: String? = null,
+    val successMessage: String? = null
 ) : UiState {
     override fun updateLoading(loading: Boolean): UiState = 
         copy(isLoading = loading)
